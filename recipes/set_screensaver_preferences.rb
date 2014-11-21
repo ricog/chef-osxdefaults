@@ -1,24 +1,24 @@
+askForPassword = (node.key?('osxdefaults') && node['osxdefaults'].key?('screensaver') && node['osxdefaults']['screensaver'].key?('askForPassword')) ? node['osxdefaults']['screensaver']['askForPassword'] : 1
+askForPasswordDelay = (node.key?('osxdefaults') && node['osxdefaults'].key?('screensaver') && node['osxdefaults']['screensaver'].key?('askForPasswordDelay')) ? node['osxdefaults']['screensaver']['askForPasswordDelay'] : 60
+idleTime = (node.key?('osxdefaults') && node['osxdefaults'].key?('screensaver') && node['osxdefaults']['screensaver'].key?('idleTime')) ? node['osxdefaults']['screensaver']['idleTime'] : 600
+
 osxdefaults_defaults "ask for password when screen is locked" do
   domain 'com.apple.screensaver'
   key 'askForPassword'
-  integer 1
+  integer askForPassword
 end
 
-osxdefaults_defaults "wait 60 seconds between screensaver & lock" do
+osxdefaults_defaults "wait #{askForPasswordDelay} seconds between screensaver & lock" do
   domain 'com.apple.screensaver'
   key 'askForPasswordDelay'
-  float 60
+  float askForPasswordDelay
 end
 
 plist_dir = ENV['HOME'] + "/Library/Preferences/ByHost"
 Dir["#{plist_dir}/com.apple.screensaver.*.plist"].each do |file|
   osxdefaults_defaults "set screensaver timeout" do
-    domain file.chomp('plist')
+    domain "ByHost/" + File.basename(file).chomp('.plist')
     key 'idleTime'
-    integer 600
+    integer idleTime
   end
-end
-
-execute "set display, disk and computer sleep times" do
-  command "pmset -a displaysleep 20 disksleep 15 sleep 0"
 end
